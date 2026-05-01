@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 public class HttpClientService {
 
@@ -20,19 +21,17 @@ public class HttpClientService {
 
             ObjectMapper mapper = new ObjectMapper();
 
-            String json =
-                    mapper.writeValueAsString(body);
+            String json = mapper.writeValueAsString(body);
 
+            @SuppressWarnings("deprecation")
             URL u = new URL(url);
 
-            HttpURLConnection con =
-                    (HttpURLConnection) u.openConnection();
+            HttpURLConnection con = (HttpURLConnection) u.openConnection();
 
             con.setRequestMethod("POST");
             con.setRequestProperty(
                     "Content-Type",
-                    "application/json"
-            );
+                    "application/json");
 
             con.setDoOutput(true);
 
@@ -44,12 +43,41 @@ public class HttpClientService {
             int responseCode = con.getResponseCode();
 
             System.out.println(
-                    "POST " + url + " -> " + responseCode
-            );
+                    "POST " + url + " -> " + responseCode);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static List<Map> get(String url) {
+
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            URL u = new URL(url);
+
+            HttpURLConnection con = (HttpURLConnection) u.openConnection();
+
+            con.setRequestMethod("GET");
+
+            int responseCode = con.getResponseCode();
+
+            System.out.println("GET " + url + " -> " + responseCode);
+
+            if (responseCode == 200) {
+
+                return mapper.readValue(
+                        con.getInputStream(),
+                        List.class);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return List.of();
     }
 
     public static class SystemInfoService {
@@ -93,10 +121,10 @@ public class HttpClientService {
 
         public static double getBatteryLevel() {
 
-            List<PowerSource> ps =
-                    si.getHardware().getPowerSources();
+            List<PowerSource> ps = si.getHardware().getPowerSources();
 
-            if (ps.isEmpty()) return -1;
+            if (ps.isEmpty())
+                return -1;
 
             return ps.get(0).getRemainingCapacityPercent() * 100;
         }
@@ -105,8 +133,7 @@ public class HttpClientService {
 
             long sent = 0;
 
-            for (NetworkIF net :
-                    si.getHardware().getNetworkIFs()) {
+            for (NetworkIF net : si.getHardware().getNetworkIFs()) {
 
                 net.updateAttributes();
                 sent += net.getBytesSent();
@@ -119,8 +146,7 @@ public class HttpClientService {
 
             long received = 0;
 
-            for (NetworkIF net :
-                    si.getHardware().getNetworkIFs()) {
+            for (NetworkIF net : si.getHardware().getNetworkIFs()) {
 
                 net.updateAttributes();
                 received += net.getBytesRecv();
