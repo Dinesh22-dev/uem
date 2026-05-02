@@ -80,6 +80,36 @@ public class HttpClientService {
         return List.of();
     }
 
+    public static List<String> getListString(String url) {
+
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            URL u = new URL(url);
+
+            HttpURLConnection con = (HttpURLConnection) u.openConnection();
+
+            con.setRequestMethod("GET");
+
+            int responseCode = con.getResponseCode();
+
+            System.out.println("GET " + url + " -> " + responseCode);
+
+            if (responseCode == 200) {
+
+                return mapper.readValue(
+                        con.getInputStream(),
+                        List.class);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return List.of();
+    }
+
     public static class SystemInfoService {
 
         private static final SystemInfo si = new SystemInfo();

@@ -9,8 +9,10 @@ import com.uem.uem_server.dto.HeartbeatMetricsDTO;
 import com.uem.uem_server.entity.Device;
 import com.uem.uem_server.entity.DeviceCommand;
 import com.uem.uem_server.entity.DeviceMetrics;
+import com.uem.uem_server.entity.DevicePolicy;
 import com.uem.uem_server.repository.DeviceCommandRepository;
 import com.uem.uem_server.repository.DeviceMetricsRepository;
+import com.uem.uem_server.repository.DevicePolicyRepository;
 import com.uem.uem_server.repository.DeviceRepository;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ public class DeviceController {
     private final DeviceRepository deviceRepository;
     private final DeviceMetricsRepository deviceMetricsRepository;
     private final DeviceCommandRepository deviceCommandRepository;
+    private final DevicePolicyRepository devicePolicyRepository;
 
     @PostMapping("/register")
     public String registerDevice(
@@ -144,5 +147,15 @@ public class DeviceController {
         existing.setStatus(cmd.getStatus());
 
         deviceCommandRepository.save(existing);
+    }
+
+    @GetMapping("/policy/{macId}")
+    public List<String> getBlockedSites(@PathVariable String macId) {
+
+        return devicePolicyRepository
+                .findByDeviceMacIdAndBlockedTrue(macId)
+                .stream()
+                .map(DevicePolicy::getWebsite)
+                .toList();
     }
 }
